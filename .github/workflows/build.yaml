@@ -1,0 +1,25 @@
+on:
+  workflow_call:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+  
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+  
+      - name: Install Dependencies
+        run: npm install --force
+
+      - name: Test
+        run: npm run test:ci
+
+      - name: Formatting rules
+        run: |
+            npm run format:check   # checks for code style rules
+            npm run lint           # checks for static analysis rules
+  
