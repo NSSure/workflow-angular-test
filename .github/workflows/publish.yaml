@@ -2,24 +2,45 @@ name: Publish
 
 on:
   pull_request:
+    types: ['opened', 'edited']
     branches:
       - develop
   push:
     branches:
       - main
+env:
+  NODE_VERSION: '20.13.1'
 jobs:
-  build:
+  build_development:
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
+  
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.13.1'
-
+          node-version: ${{ env.NODE_VERSION }}
+  
+      - name: Install Dependencies
+        run: npm install --force
+  
+      - name: Build
+        if: github.event.pull_request.labels == 'ab'
+        run: npm run build
+  build_production:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+  
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+  
       - name: Install Dependencies
         run: npm install --force
 
