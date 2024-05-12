@@ -25,10 +25,21 @@ jobs:
   
       - name: Install Dependencies
         run: npm install --force
+
+      - name: Test
+        run: npm run test:ci
+
+      - name: Formatting rules
+        run: |
+            npm run format:check   # checks for code style rules
+            npm run lint           # checks for static analysis rules
   
-      - name: Build
+      - name: Publish
         if: github.event.pull_request.labels == 'ab'
-        run: npm run build
+        run: |
+          npm run prebuild
+          npm run publish:${{ github.event.pull_request.labels }}
+        
   build_production:
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
@@ -43,6 +54,14 @@ jobs:
   
       - name: Install Dependencies
         run: npm install --force
+
+      - name: Test
+        run: npm run test:ci
+
+      - name: Formatting rules
+        run: |
+            npm run format:check   # checks for code style rules
+            npm run lint           # checks for static analysis rules
 
       - name: Build
         run: npm run build
