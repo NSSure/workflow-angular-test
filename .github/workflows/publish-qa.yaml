@@ -1,0 +1,23 @@
+name: Publish Feature
+
+on:
+  pull_request:
+    types: ['opened', 'edited']
+    branches:
+      - main
+env:
+  NODE_VERSION: '20.13.1'
+jobs:
+  build:
+    if: contains(github.event.pull_request.labels.*.name, 'feature')
+    uses: ./.github/workflows/build.yaml
+    secrets: inherit
+  publish:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publish
+        if: github.event.pull_request.labels == 'ab'
+        run: |
+          npm run prebuild
+          npm run publish:${{ github.event.pull_request.labels }}
