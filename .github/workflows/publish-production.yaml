@@ -1,8 +1,7 @@
-name: Publish Feature
+name: Publish Production
 
 on:
-  pull_request:
-    types: ['opened', 'edited']
+  push:
     branches:
       - main
 env:
@@ -20,7 +19,6 @@ env:
     'prod_bmo')
 jobs:
   build:
-    if: contains(github.event.pull_request.labels.*.name, 'production')
     uses: ./.github/workflows/build.yaml
     secrets: inherit
   publish:
