@@ -1,4 +1,4 @@
-name: Publish Feature
+name: Publish QA
 
 on:
   pull_request:
@@ -7,9 +7,20 @@ on:
       - main
 env:
   NODE_VERSION: '20.13.1'
+  CLIENTS: (
+    'prod_npt',
+    'prod_jpmc',
+    'prod_jpms',
+    'prod_jpmdaf',
+    'prod_ubs',
+    'prod_nptuk',
+    'prod_wells',
+    'prod_ab',
+    'prod_nptukusd',
+    'prod_bmo')
 jobs:
   build:
-    if: contains(github.event.pull_request.labels.*.name, 'feature')
+    if: contains(github.event.pull_request.labels.*.name, 'production')
     uses: ./.github/workflows/build.yaml
     secrets: inherit
   publish:
@@ -17,7 +28,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Publish
-        if: github.event.pull_request.labels == 'ab'
         run: |
-          npm run prebuild
-          npm run publish:${{ github.event.pull_request.labels }}
+          index = 0
+          total = ${{ env.CLIENTS[@] }}
+          
+          for item in ${{ env.CLIENTS }} do
+            complete=$((index * 100 / total))
+            echo "Building $complete% Complete: $item"
+            npm run publish:"$item"
+            ((index++))
+          done
+
+      - name: Create Zip Artifact
+        run: |
+          cd ${{ github.workspace }}/dist
+          zip -r ${{ github.workspace }}/dist .
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: spa
+          path: ${{ github.workspace }}/spa.zip
